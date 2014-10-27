@@ -10,11 +10,11 @@
 #
 
 import argparse
-from json import dump
-from time import time
-from timeit import default_timer
+import json
 import re
 import sys
+import time
+from timeit import default_timer
 
 from browsermobproxy import Server
 from selenium import webdriver
@@ -31,7 +31,7 @@ def slugify(text):
 
 def save_har(har_name, har):
     with open(har_name, 'w') as f:
-        dump(har, f, indent=2, ensure_ascii=False)
+        json.dump(har, f, indent=2, ensure_ascii=False)
 
 
 def parse_cmd_args():
@@ -61,7 +61,7 @@ def create_har(url):
     end_time = default_timer()
     elapsed_secs = end_time - start_time
 
-    har_name = '{}-{}.har'.format(url_slug, time())
+    har_name = '{}-{}.har'.format(url_slug, time.time())
     save_har(har_name, proxy.har)
 
     server.stop()
