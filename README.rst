@@ -8,7 +8,7 @@ harprofiler
 About
 -----
 
-WIP
+`harprofiler` is a python utility used for profiling web pageloads.  It loads a given URL and saves a JSON file in HAR (HTTP Archive) format.  The HAR format contains detailed performance data about the page loading.
 
 ----
 
@@ -50,7 +50,6 @@ Usage
 
 run pageload profiler::
 
-    $ python harprofiler.py
+    $ python harprofiler.py https://www.edx.org
 
-results are saved in timestamped har files.
-
+(results are saved in timestamped har files)
