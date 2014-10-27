@@ -36,12 +36,11 @@ download browsermob proxy into branch root::
     $ curl https://s3-us-west-1.amazonaws.com/lightbody-bmp/browsermob-proxy-2.0-beta-9-bin.zip -o bmp.zip
     $ unzip bmp.zip
 
-create a virtualenv and install deps::
+create a virtualenv and install Python dependencies::
 
     $ virtualenv env
     $ source env/bin/activate
-    $ pip install selenium
-    $ pip install browsermob-proxy
+    $ pip install -r requirements.txt
 
 ----
 
