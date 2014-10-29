@@ -61,7 +61,7 @@ def create_har(url):
     end_time = default_timer()
     elapsed_secs = end_time - start_time
 
-    har_name = '{}-{}.har'.format(url_slug, time.time())
+    har_name = '{}-{}.har'.format(url_slug, start_time)
     save_har(har_name, proxy.har)
 
     server.stop()
