@@ -13,10 +13,10 @@ import argparse
 import json
 import re
 import sys
-import time
 from timeit import default_timer
 
 from browsermobproxy import Server
+from pyvirtualdisplay import Display
 from selenium import webdriver
 
 
@@ -37,13 +37,17 @@ def save_har(har_name, har):
 def parse_cmd_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('url', help='URL of page to load')
+    parser.add_argument(
+        '-x', '--headless', action='store_true', help='use headless display'
+    )
     args = parser.parse_args()
     if not args.url.lower().startswith('http'):
         raise ValueError('URL must start with "http" or "https"')
-    return args.url
+    return args
 
 
 def create_har(url):
+    print 'starting browsermob proxy'
     server = Server('{}/bin/browsermob-proxy'.format(BROWSERMOB))
     server.start()
 
@@ -53,32 +57,40 @@ def create_har(url):
     driver = webdriver.Firefox(firefox_profile=profile)
 
     url_slug = slugify(url)
-
     proxy.new_har(url_slug)
 
+    print 'loading page: {}'.format(url)
     start_time = default_timer()
     driver.get(url)
     end_time = default_timer()
     elapsed_secs = end_time - start_time
 
     har_name = '{}-{}.har'.format(url_slug, start_time)
+    print 'saving HAR file: {}'.format(har_name)
     save_har(har_name, proxy.har)
 
-    server.stop()
     driver.quit()
+
+    print 'stopping browsermob proxy'
+    server.stop()
 
     return elapsed_secs
 
 
 def main():
     try:
-        url = parse_cmd_args()
+        args = parse_cmd_args()
     except ValueError as e:
         print e.message
         sys.exit(1)
 
-    elapsed_secs = create_har(url)
-    print 'pageload time for {!r} was {:.3f} secs'.format(url, elapsed_secs)
+    if args.headless:
+        display = Display(visible=0, size=(1024, 768))
+        display.start()
+    elapsed_secs = create_har(args.url)
+    if args.headless:
+        display.stop()
+    print 'load time for {!r} was {:.3f} secs'.format(args.url, elapsed_secs)
 
 
 if __name__ == '__main__':
