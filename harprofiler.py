@@ -22,6 +22,8 @@ from selenium import webdriver
 
 BROWSERMOB = './browsermob-proxy-2.0-beta-9'
 
+VIRTUAL_DISPLAY_SIZE = (1024, 768)
+
 
 def slugify(text):
     pattern = re.compile(r'[^a-z0-9]+')
@@ -85,11 +87,14 @@ def main():
         sys.exit(1)
 
     if args.headless:
-        display = Display(visible=0, size=(1024, 768))
+        display = Display(visible=0, size=VIRTUAL_DISPLAY_SIZE)
         display.start()
+
     elapsed_secs = create_har(args.url)
+
     if args.headless:
         display.stop()
+
     print 'load time for {!r} was {:.3f} secs'.format(args.url, elapsed_secs)
 
 
