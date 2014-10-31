@@ -10,8 +10,6 @@ About
 
 `harprofiler` is a python utility used for profiling web pageloads.  It loads a given URL and saves a JSON file in HAR (HTTP Archive) format.  The HAR format contains detailed performance data about the page loading.
 
-----
-
 Prerequisites
 -------------
 
@@ -22,9 +20,9 @@ Prerequisites
 Installation
 ------------
 
-install java runtime::
+install Java runtime and Xvfb::
 
-    $ sudo apt-get install default-jre
+    $ sudo apt-get install default-jre xvfb
 
 grab the profiler branch::
 
@@ -42,13 +40,27 @@ create a virtualenv and install Python dependencies::
     $ source env/bin/activate
     $ pip install -r requirements.txt
 
-----
 
 Usage
-------
+-----
+
+::
+
+    $ python harprofiler.py -h
+    usage: harprofiler.py [-h] [-x] url
+
+    positional arguments:
+      url             URL of page to load
+
+    optional arguments:
+      -h, --help      show this help message and exit
+      -x, --headless  use headless display
+
+Example
+-------
 
 run pageload profiler::
 
     $ python harprofiler.py https://www.edx.org
 
-(results are saved in timestamped har files)
+(results are saved in a timestamped har file)
