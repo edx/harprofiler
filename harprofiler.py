@@ -48,7 +48,7 @@ def parse_cmd_args():
     return args
 
 
-def create_har(url):
+def create_hars(url):
     print 'starting browsermob proxy'
     server = Server('{}/bin/browsermob-proxy'.format(BROWSERMOB))
     server.start()
@@ -71,6 +71,19 @@ def create_har(url):
     print 'saving HAR file: {}'.format(har_name)
     save_har(har_name, proxy.har)
 
+    url_slug = '{}-cached'.format(slugify(url))
+    proxy.new_har(url_slug)
+
+    print 'loading cached page: {}'.format(url)
+    cached_start_time = default_timer()
+    driver.get(url)
+    end_time = default_timer()
+    elapsed_secs = end_time - cached_start_time
+
+    har_name = '{}-{}.har'.format(url_slug, cached_start_time)
+    print 'saving HAR file: {}'.format(har_name)
+    save_har(har_name, proxy.har)
+
     driver.quit()
 
     print 'stopping browsermob proxy'
@@ -90,12 +103,14 @@ def main():
         display = Display(visible=0, size=VIRTUAL_DISPLAY_SIZE)
         display.start()
 
-    elapsed_secs = create_har(args.url)
+    elapsed_secs = create_hars(args.url)
 
     if args.headless:
         display.stop()
 
-    print 'load time for {!r} was {:.3f} secs'.format(args.url, elapsed_secs)
+    print 'load time for {!r} was {:.3f} secs (uncached)'.format(
+        args.url, elapsed_secs
+    )
 
 
 if __name__ == '__main__':
