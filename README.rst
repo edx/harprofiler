@@ -10,28 +10,21 @@ About
 
 `harprofiler` is a python utility used for profiling web pageloads.  It loads a given URL and saves JSON files in HAR (HTTP Archive) format.  The HAR format contains detailed performance data about the page loading.  It will load the page once uncached, and then again with it cached in the browser.  A HAR file for each pageload is saved.
 
-Prerequisites
--------------
-
-* Java JRE
-* Python 2.7
-* Firefox Browser
-
 Installation
 ------------
 
-install Java runtime and Xvfb::
+install system packages::
 
-    $ sudo apt-get install default-jre xvfb
+    $ sudo apt-get install -y default-jre firefox git python-virtualenv xvfb
 
-grab the profiler branch::
+clone the harprofiler repo::
 
     $ git clone https://github.com/cgoldberg/harprofiler.git
 
 download browsermob proxy into branch root::
 
     $ cd harprofiler
-    $ wget https://s3-us-west-1.amazonaws.com/lightbody-bmp/browsermob-proxy-2.0-beta-9-bin.zip -o bmp.zip
+    $ wget https://s3-us-west-1.amazonaws.com/lightbody-bmp/browsermob-proxy-2.0-beta-9-bin.zip -O bmp.zip
     $ unzip bmp.zip
 
 create a virtualenv and install Python dependencies::
@@ -39,7 +32,6 @@ create a virtualenv and install Python dependencies::
     $ virtualenv env
     $ source env/bin/activate
     $ pip install -r requirements.txt
-
 
 Usage
 -----
