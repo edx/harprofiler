@@ -8,7 +8,7 @@ harprofiler
 About
 -----
 
-`harprofiler` is a python utility used for profiling web pageloads.  It loads a given URL and saves a JSON file in HAR (HTTP Archive) format.  The HAR format contains detailed performance data about the page loading.
+`harprofiler` is a python utility used for profiling web pageloads.  It loads a given URL and saves JSON files in HAR (HTTP Archive) format.  The HAR format contains detailed performance data about the page loading.  It will load the page once uncached, and then again with it cached in the browser.  A HAR file for each pageload is saved.
 
 Prerequisites
 -------------
@@ -31,7 +31,7 @@ grab the profiler branch::
 download browsermob proxy into branch root::
 
     $ cd harprofiler
-    $ curl https://s3-us-west-1.amazonaws.com/lightbody-bmp/browsermob-proxy-2.0-beta-9-bin.zip -o bmp.zip
+    $ wget https://s3-us-west-1.amazonaws.com/lightbody-bmp/browsermob-proxy-2.0-beta-9-bin.zip -o bmp.zip
     $ unzip bmp.zip
 
 create a virtualenv and install Python dependencies::
@@ -63,4 +63,4 @@ run pageload profiler::
 
     $ python harprofiler.py https://www.edx.org
 
-(results are saved in a timestamped har file)
+* results are saved in timestamped har files
