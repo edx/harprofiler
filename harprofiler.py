@@ -9,20 +9,20 @@
 #     http://www.apache.org/licenses/LICENSE-2.0
 #
 
-import argparse
 import json
 import re
 import sys
 from timeit import default_timer
+import yaml
 
 from browsermobproxy import Server
 from pyvirtualdisplay import Display
 from selenium import webdriver
 
 
-BROWSERMOB = './browsermob-proxy-2.0-beta-9'
-
-VIRTUAL_DISPLAY_SIZE = (1024, 768)
+def load_config(config_file='config.yaml'):
+    config = yaml.load(file(config_file))
+    return config
 
 
 def slugify(text):
@@ -36,81 +36,66 @@ def save_har(har_name, har):
         json.dump(har, f, indent=2, ensure_ascii=False)
 
 
-def parse_cmd_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('url', help='URL of page to load')
-    parser.add_argument(
-        '-x', '--headless', action='store_true', help='use headless display'
-    )
-    args = parser.parse_args()
-    if not args.url.lower().startswith('http'):
-        raise ValueError('URL must start with "http" or "https"')
-    return args
+def create_hars(urls, browsermob_location, run_cached):
+    for url in urls:
+        print 'starting browsermob proxy'
+        server = Server('{}/bin/browsermob-proxy'.format(browsermob_location))
+        server.start()
 
+        proxy = server.create_proxy()
+        profile = webdriver.FirefoxProfile()
+        profile.set_proxy(proxy.selenium_proxy())
+        driver = webdriver.Firefox(firefox_profile=profile)
 
-def create_hars(url):
-    print 'starting browsermob proxy'
-    server = Server('{}/bin/browsermob-proxy'.format(BROWSERMOB))
-    server.start()
+        url_slug = slugify(url)
+        proxy.new_har(url_slug)
 
-    proxy = server.create_proxy()
-    profile = webdriver.FirefoxProfile()
-    profile.set_proxy(proxy.selenium_proxy())
-    driver = webdriver.Firefox(firefox_profile=profile)
+        print 'loading page: {}'.format(url)
+        start_time = default_timer()
+        driver.get(url)
+        end_time = default_timer()
+        elapsed_secs = end_time - start_time
 
-    url_slug = slugify(url)
-    proxy.new_har(url_slug)
+        har_name = '{}-{}.har'.format(url_slug, start_time)
+        print 'saving HAR file: {}'.format(har_name)
+        save_har(har_name, proxy.har)
 
-    print 'loading page: {}'.format(url)
-    start_time = default_timer()
-    driver.get(url)
-    end_time = default_timer()
-    elapsed_secs = end_time - start_time
+        if run_cached:
+            url_slug = '{}-cached'.format(slugify(url))
+            proxy.new_har(url_slug)
 
-    har_name = '{}-{}.har'.format(url_slug, start_time)
-    print 'saving HAR file: {}'.format(har_name)
-    save_har(har_name, proxy.har)
+            print 'loading cached page: {}'.format(url)
+            cached_start_time = default_timer()
+            driver.get(url)
+            end_time = default_timer()
+            elapsed_secs = end_time - cached_start_time
 
-    url_slug = '{}-cached'.format(slugify(url))
-    proxy.new_har(url_slug)
+            har_name = '{}-{}.har'.format(url_slug, cached_start_time)
+            print 'saving HAR file: {}'.format(har_name)
+            save_har(har_name, proxy.har)
 
-    print 'loading cached page: {}'.format(url)
-    cached_start_time = default_timer()
-    driver.get(url)
-    end_time = default_timer()
-    elapsed_secs = end_time - cached_start_time
+        driver.quit()
 
-    har_name = '{}-{}.har'.format(url_slug, cached_start_time)
-    print 'saving HAR file: {}'.format(har_name)
-    save_har(har_name, proxy.har)
-
-    driver.quit()
-
-    print 'stopping browsermob proxy'
-    server.stop()
-
-    return elapsed_secs
+        print 'stopping browsermob proxy'
+        server.stop()
 
 
 def main():
-    try:
-        args = parse_cmd_args()
-    except ValueError as e:
-        print e.message
-        sys.exit(1)
+    config = load_config()
 
-    if args.headless:
-        display = Display(visible=0, size=VIRTUAL_DISPLAY_SIZE)
+    if config['virtual_display']:
+        display = Display(visible=0, size=(
+            config['virtual_display_size_x'],
+            config['virtual_display_size_y']
+        ))
         display.start()
 
-    elapsed_secs = create_hars(args.url)
-
-    if args.headless:
-        display.stop()
-
-    print 'load time for {!r} was {:.3f} secs (uncached)'.format(
-        args.url, elapsed_secs
+    elapsed_secs = create_hars(
+        config['urls'], config['browsermob_location'],  config['run_cached']
     )
+
+    if config['virtual_display']:
+        display.stop()
 
 
 if __name__ == '__main__':

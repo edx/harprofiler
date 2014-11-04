@@ -16,13 +16,14 @@ Prerequisites
 * Java JRE
 * Python 2.7
 * Firefox Browser
+* Xvfb
 
 Installation
 ------------
 
-install Java runtime and Xvfb::
+install system requirements::
 
-    $ sudo apt-get install default-jre xvfb
+    $ sudo apt-get install -y -q default-jre firefox python-virtualenv xvfb
 
 grab the profiler branch::
 
@@ -31,7 +32,7 @@ grab the profiler branch::
 download browsermob proxy into branch root::
 
     $ cd harprofiler
-    $ wget https://s3-us-west-1.amazonaws.com/lightbody-bmp/browsermob-proxy-2.0-beta-9-bin.zip -o bmp.zip
+    $ wget https://s3-us-west-1.amazonaws.com/lightbody-bmp/browsermob-proxy-2.0-beta-9-bin.zip -O bmp.zip
     $ unzip bmp.zip
 
 create a virtualenv and install Python dependencies::
@@ -41,26 +42,27 @@ create a virtualenv and install Python dependencies::
     $ pip install -r requirements.txt
 
 
+Configuration
+-------------
+
+`harprofiler` uses a yaml configuration file named `config.yaml`.
+
+example config::
+
+    browsermob_location: ./browsermob-proxy-2.0-beta-9
+    run_cached: true
+    urls:
+    - https://www.edx.org
+    - https://www.edx.org/course-search
+    virtual_display: true
+    virtual_display_size_x: 1024
+    virtual_display_size_y: 768
+
 Usage
 -----
 
-::
-
-    $ python harprofiler.py -h
-    usage: harprofiler.py [-h] [-x] url
-
-    positional arguments:
-      url             URL of page to load
-
-    optional arguments:
-      -h, --help      show this help message and exit
-      -x, --headless  use headless display
-
-Example
--------
-
 run pageload profiler::
 
-    $ python harprofiler.py https://www.edx.org
+    $ python harprofiler.py
 
-* results are saved in timestamped har files
+* results are saved in timestamped .har files
