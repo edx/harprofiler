@@ -33,26 +33,27 @@ create a virtualenv and install Python dependencies::
     $ source env/bin/activate
     $ pip install -r requirements.txt
 
+Configuration
+-------------
+
+`harprofiler` uses a yaml configuration file named `config.yaml`.
+
+example config::
+
+    browsermob_dir: ./browsermob-proxy-2.0-beta-9
+    run_cached: true
+    urls:
+    - https://www.edx.org
+    - https://www.edx.org/course-search
+    virtual_display: true
+    virtual_display_size_x: 1024
+    virtual_display_size_y: 768
+
 Usage
 -----
 
-::
-
-    $ python harprofiler.py -h
-    usage: harprofiler.py [-h] [-x] url
-
-    positional arguments:
-      url             URL of page to load
-
-    optional arguments:
-      -h, --help      show this help message and exit
-      -x, --headless  use headless display
-
-Example
--------
-
 run pageload profiler::
 
-    $ python harprofiler.py https://www.edx.org
+    $ python harprofiler.py
 
-* results are saved in timestamped har files
+* results are saved in timestamped .har files
