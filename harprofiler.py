@@ -12,7 +12,7 @@
 import json
 import re
 import sys
-from timeit import default_timer
+import time
 import yaml
 
 from browsermobproxy import Server
@@ -51,12 +51,9 @@ def create_hars(urls, browsermob_dir, run_cached):
         proxy.new_har(url_slug)
 
         print 'loading page: {}'.format(url)
-        start_time = default_timer()
         driver.get(url)
-        end_time = default_timer()
-        elapsed_secs = end_time - start_time
 
-        har_name = '{}-{}.har'.format(url_slug, start_time)
+        har_name = '{}-{}.har'.format(url_slug, time.time())
         print 'saving HAR file: {}'.format(har_name)
         save_har(har_name, proxy.har)
 
@@ -65,12 +62,9 @@ def create_hars(urls, browsermob_dir, run_cached):
             proxy.new_har(url_slug)
 
             print 'loading cached page: {}'.format(url)
-            cached_start_time = default_timer()
             driver.get(url)
-            end_time = default_timer()
-            elapsed_secs = end_time - cached_start_time
 
-            har_name = '{}-{}.har'.format(url_slug, cached_start_time)
+            har_name = '{}-{}.har'.format(url_slug, time.time())
             print 'saving HAR file: {}'.format(har_name)
             save_har(har_name, proxy.har)
 
