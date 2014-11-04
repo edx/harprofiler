@@ -36,10 +36,10 @@ def save_har(har_name, har):
         json.dump(har, f, indent=2, ensure_ascii=False)
 
 
-def create_hars(urls, browsermob_location, run_cached):
+def create_hars(urls, browsermob_dir, run_cached):
     for url in urls:
         print 'starting browsermob proxy'
-        server = Server('{}/bin/browsermob-proxy'.format(browsermob_location))
+        server = Server('{}/bin/browsermob-proxy'.format(browsermob_dir))
         server.start()
 
         proxy = server.create_proxy()
@@ -91,7 +91,7 @@ def main():
         display.start()
 
     elapsed_secs = create_hars(
-        config['urls'], config['browsermob_location'],  config['run_cached']
+        config['urls'], config['browsermob_dir'], config['run_cached']
     )
 
     if config['virtual_display']:

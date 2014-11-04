@@ -40,7 +40,7 @@ Configuration
 
 example config::
 
-    browsermob_location: ./browsermob-proxy-2.0-beta-9
+    browsermob_dir: ./browsermob-proxy-2.0-beta-9
     run_cached: true
     urls:
     - https://www.edx.org
