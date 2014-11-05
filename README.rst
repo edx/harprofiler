@@ -19,7 +19,7 @@ install system packages::
 
 clone the harprofiler repo::
 
-    $ git clone https://github.com/cgoldberg/harprofiler.git
+    $ git clone https://github.com/edx/harprofiler.git
 
 download browsermob proxy into branch root::
 
