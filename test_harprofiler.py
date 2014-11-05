@@ -21,7 +21,10 @@ class ProfilerTest(unittest.TestCase):
 
     def test_default_config(self):
         cfg = harprofiler.load_config(config_file='config.yaml')
-        self.assertEqual(cfg['browsermob_dir'], './browsermob-proxy-2.0-beta-9')
+        self.assertEqual(
+            cfg['browsermob_dir'],
+            './browsermob-proxy-2.0-beta-9'
+        )
         self.assertTrue(cfg['run_cached'])
         self.assertTrue(cfg['virtual_display'])
         self.assertEqual(cfg['virtual_display_size_x'], 1024)
