@@ -84,9 +84,7 @@ def main():
         ))
         display.start()
 
-    elapsed_secs = create_hars(
-        config['urls'], config['browsermob_dir'], config['run_cached']
-    )
+    create_hars(config['urls'], config['browsermob_dir'], config['run_cached'])
 
     if config['virtual_display']:
         display.stop()

@@ -19,7 +19,13 @@ class ProfilerTest(unittest.TestCase):
         slug = harprofiler.slugify(url)
         self.assertEqual(slug, expected_slug)
 
-    # TODO : add more tests
+    def test_default_config(self):
+        cfg = harprofiler.load_config(config_file='config.yaml')
+        self.assertEqual(cfg['browsermob_dir'], './browsermob-proxy-2.0-beta-9')
+        self.assertTrue(cfg['run_cached'])
+        self.assertTrue(cfg['virtual_display'])
+        self.assertEqual(cfg['virtual_display_size_x'], 1024)
+        self.assertEqual(cfg['virtual_display_size_y'], 768)
 
 
 if __name__ == '__main__':
