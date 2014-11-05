@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import glob
+import os
 import unittest
 
 import harprofiler
@@ -31,5 +33,20 @@ class ProfilerTest(unittest.TestCase):
         self.assertEqual(cfg['virtual_display_size_y'], 768)
 
 
+class AcceptanceTest(unittest.TestCase):
+
+    def remove_hars(self):
+        for f in glob.glob('*.har'):
+            os.remove(f)
+
+    def test_main(self):
+        self.addCleanup(self.remove_hars)
+        harprofiler.main()
+        num_urls = len(harprofiler.load_config()['urls'])
+        num_pageloads = num_urls * 2  # uncached and cached
+        num_hars = len(glob.glob('*.har'))
+        self.assertEqual(num_hars, num_pageloads)
+
+
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main(verbosity=2)
