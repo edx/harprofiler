@@ -11,13 +11,14 @@
 
 import json
 import re
+import os
 import time
 import yaml
 
 from browsermobproxy import Server
 from pyvirtualdisplay import Display
 from selenium import webdriver
-
+from haruploader import upload_hars
 
 def load_config(config_file='config.yaml'):
     config = yaml.load(file(config_file))
@@ -30,12 +31,13 @@ def slugify(text):
     return slug
 
 
-def save_har(har_name, har):
-    with open(har_name, 'w') as f:
+def save_har(har_name, har_dir, har):
+    har_path = os.path.join(har_dir, har_name)
+    with open(har_path, 'w') as f:
         json.dump(har, f, indent=2, ensure_ascii=False)
 
 
-def create_hars(urls, browsermob_dir, run_cached):
+def create_hars(urls, har_dir, browsermob_dir, run_cached):
     for url in urls:
         print 'starting browsermob proxy'
         server = Server('{}/bin/browsermob-proxy'.format(browsermob_dir))
@@ -54,7 +56,7 @@ def create_hars(urls, browsermob_dir, run_cached):
 
         har_name = '{}-{}.har'.format(url_slug, time.time())
         print 'saving HAR file: {}'.format(har_name)
-        save_har(har_name, proxy.har)
+        save_har(har_name, har_dir, proxy.har)
 
         if run_cached:
             url_slug = '{}-cached'.format(slugify(url))
@@ -65,7 +67,7 @@ def create_hars(urls, browsermob_dir, run_cached):
 
             har_name = '{}-{}.har'.format(url_slug, time.time())
             print 'saving HAR file: {}'.format(har_name)
-            save_har(har_name, proxy.har)
+            save_har(har_name, har_dir, proxy.har)
 
         driver.quit()
 
@@ -83,7 +85,13 @@ def main():
         ))
         display.start()
 
-    create_hars(config['urls'], config['browsermob_dir'], config['run_cached'])
+    if not os.path.isdir(config['har_dir']):
+        os.makedirs(config['har_dir'])
+
+    create_hars(config['urls'], config['har_dir'], config['browsermob_dir'], config['run_cached'])
+
+    if config.get('harstorage_url'):
+        upload_hars(config['har_dir'], config['harstorage_url'])
 
     if config['virtual_display']:
         display.stop()
