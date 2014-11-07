@@ -14,11 +14,18 @@ import re
 import os
 import time
 import yaml
+import argparse
+import logging
 
 from browsermobproxy import Server
 from pyvirtualdisplay import Display
 from selenium import webdriver
 from haruploader import upload_hars
+
+logging.basicConfig(format="%(levelname)s [%(name)s] %(message)s")
+log = logging.getLogger('harprofiler')
+log.setLevel(logging.INFO)
+
 
 def load_config(config_file='config.yaml'):
     config = yaml.load(file(config_file))
@@ -39,7 +46,7 @@ def save_har(har_name, har_dir, har):
 
 def create_hars(urls, har_dir, browsermob_dir, run_cached):
     for url in urls:
-        print 'starting browsermob proxy'
+        log.info('starting browsermob proxy')
         server = Server('{}/bin/browsermob-proxy'.format(browsermob_dir))
         server.start()
 
@@ -51,32 +58,32 @@ def create_hars(urls, har_dir, browsermob_dir, run_cached):
         url_slug = slugify(url)
         proxy.new_har(url_slug)
 
-        print 'loading page: {}'.format(url)
+        log.info('loading page: {}'.format(url))
         driver.get(url)
 
         har_name = '{}-{}.har'.format(url_slug, time.time())
-        print 'saving HAR file: {}'.format(har_name)
+        log.info('saving HAR file: {}'.format(har_name))
         save_har(har_name, har_dir, proxy.har)
 
         if run_cached:
             url_slug = '{}-cached'.format(slugify(url))
             proxy.new_har(url_slug)
 
-            print 'loading cached page: {}'.format(url)
+            log.info('loading cached page: {}'.format(url))
             driver.get(url)
 
             har_name = '{}-{}.har'.format(url_slug, time.time())
-            print 'saving HAR file: {}'.format(har_name)
+            log.info('saving HAR file: {}'.format(har_name))
             save_har(har_name, har_dir, proxy.har)
 
         driver.quit()
 
-        print 'stopping browsermob proxy'
+        log.info('stopping browsermob proxy')
         server.stop()
 
 
-def main():
-    config = load_config()
+def main(config_file='config.yaml'):
+    config = load_config(config_file)
 
     if config['virtual_display']:
         display = Display(visible=0, size=(
@@ -98,4 +105,12 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser(prog='harprofiler.py')
+    parser.add_argument(
+        '--config',
+        default = 'config.yaml', 
+        help = "Path to configuration file (Default: config.yaml)"
+    )
+    args = parser.parse_args()
+
+    main(args.config)
