@@ -1,0 +1,10 @@
+browsermob_dir: ./browsermob-proxy-2.0-beta-9
+har_dir: ./test_hars
+harstorage_url: "http://edx.mockharstorage.com"
+run_cached: true
+urls:
+- https://www.edx.org
+- https://www.edx.org/course-search
+virtual_display: true
+virtual_display_size_x: 1024
+virtual_display_size_y: 768

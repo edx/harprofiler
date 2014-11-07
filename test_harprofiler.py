@@ -2,19 +2,24 @@
 
 import glob
 import os
+import re
 import unittest
 import harprofiler
 import haruploader
-import uuid
-import shutil
-import os
 import requests
 import logging 
+import uuid
+import shutil
 from httmock import urlmatch, HTTMock
 
 # Override logging level for tests
-log = logging.getLogger('haruploader')
-log.setLevel(logging.WARNING)
+loggers = [
+    logging.getLogger('haruploader'),
+    logging.getLogger('harprofiler'),
+]
+
+for log in loggers:
+    log.setLevel(logging.WARNING)
 
 
 class ProfilerTest(unittest.TestCase):
@@ -32,7 +37,7 @@ class ProfilerTest(unittest.TestCase):
         self.assertEqual(slug, expected_slug)
 
     def test_default_config(self):
-        cfg = harprofiler.load_config(config_file='config.yaml')
+        cfg = harprofiler.load_config(config_file='test_config.yaml')
         self.assertEqual(
             cfg['browsermob_dir'],
             './browsermob-proxy-2.0-beta-9'
@@ -43,46 +48,46 @@ class ProfilerTest(unittest.TestCase):
         self.assertEqual(cfg['virtual_display_size_y'], 768)
 
 
-class AcceptanceTest(unittest.TestCase):
+class HarFileTestCase(unittest.TestCase):
+    def setUp(self):
+        self.config = harprofiler.load_config('test_config.yaml')
+        
+        self.test_dir = self.config['har_dir']
+        os.makedirs(self.test_dir)
+        
+        self.addCleanup(self.remove_hars)
 
     def remove_hars(self):
-        for f in glob.glob('*.har'):
-            os.remove(f)
+        shutil.rmtree(self.test_dir)
 
+
+class AcceptanceTest(HarFileTestCase):
     def test_main(self):
-        self.addCleanup(self.remove_hars)
-        harprofiler.main()
-        num_urls = len(harprofiler.load_config()['urls'])
+        harprofiler.main('test_config.yaml')
+        num_urls = len(self.config['urls'])
         num_pageloads = num_urls * 2  # uncached and cached
-        num_hars = len(glob.glob('*.har'))
+        num_hars = len(glob.glob(os.path.join(self.test_dir, '*.har')))
         self.assertEqual(num_hars, num_pageloads)
 
 
-
-class StorageTest(unittest.TestCase):
+class StorageTest(HarFileTestCase):
     """
     Tests to confirm that the response handling for sending to harstorage works
     as expected.
     """
     def setUp(self):
-        self.test_dir = 'test-files-' + str(uuid.uuid4())
-        os.makedirs(self.test_dir)
-
-        self.test_file = os.path.join(self.test_dir, 'test-file.har')
+        super(StorageTest, self).setUp()
+        self.url = self.config['harstorage_url']
+        self.test_file = os.path.join(self.test_dir, str(uuid.uuid4()) + '.har')
         with open(self.test_file, 'w') as f:
             f.write("I'm a fake har file")
-
-        self.url = "http://mockharstorage.com"
-
-    def tearDown(self):
-        shutil.rmtree(self.test_dir)
 
     def test_success(self):
         """
         If a file is successfully sent to harstorage, then it is put in
         the 'completed_uploads' folder.
         """
-        @urlmatch(method='post', netloc=r'(.*\.)?mockharstorage\.com$')
+        @urlmatch(method='post')
         def harstorage_mock_success(*args, **kwargs):
             return {
                 'status_code': 200,
@@ -106,7 +111,7 @@ class StorageTest(unittest.TestCase):
         then it is put in a folder of failed files so that we can possibly
         inspect them.
         """
-        @urlmatch(method='post', netloc=r'(.*\.)?mockharstorage\.com$')
+        @urlmatch(method='post')
         def harstorage_mock_parsing_error(*args, **kwargs):
             return {
                 'status_code': 200,
@@ -129,7 +134,7 @@ class StorageTest(unittest.TestCase):
         If a file fails to be sent to harstorage because of a 500 error,
         then it is left in the folder to retry.
         """
-        @urlmatch(method='post', netloc=r'(.*\.)?mockharstorage\.com$')
+        @urlmatch(method='post')
         def harstorage_mock_server_error(*args, **kwargs):
             return {
                 'status_code': 500,
@@ -146,7 +151,7 @@ class StorageTest(unittest.TestCase):
         If a file fails to be sent to harstorage because of a connection issue,
         then it is left in the folder to retry.
         """    
-        @urlmatch(method='post', netloc=r'(.*\.)?mockharstorage\.com$')
+        @urlmatch(method='post')
         def harstorage_mock_bad_connection(*args, **kwargs):
             raise requests.exceptions.ConnectionError('ConnectionError')
 
@@ -160,7 +165,7 @@ class StorageTest(unittest.TestCase):
         If a file fails to be sent to harstorage because of a timeout,
         then it is left in the folder to retry.
         """
-        @urlmatch(method='post', netloc=r'(.*\.)?mockharstorage\.com$')
+        @urlmatch(method='post')
         def harstorage_mock_timeout(*args, **kwargs):
             raise requests.exceptions.Timeout('TimeoutError')
 
