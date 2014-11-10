@@ -3,6 +3,7 @@
 import glob
 import logging
 import os
+<<<<<<< HEAD
 import re
 import uuid
 import unittest
@@ -15,7 +16,18 @@ import harprofiler
 import haruploader
 
 
+=======
+import shutil
+import unittest
+import uuid
+
+import requests
+>>>>>>> master
 from httmock import urlmatch, HTTMock
+
+import harprofiler
+import haruploader
+
 
 # Override logging level for tests
 loggers = [
@@ -59,9 +71,17 @@ class ProfilerTest(unittest.TestCase):
 
 class HarFileTestCase(unittest.TestCase):
     def setUp(self):
+<<<<<<< HEAD
         self.config = yaml.load(file('test_config.yaml'))
         self.test_dir = self.config['har_dir']
         os.makedirs(self.test_dir)
+=======
+        self.config = harprofiler.load_config('test_config.yaml')
+
+        self.test_dir = self.config['har_dir']
+        os.makedirs(self.test_dir)
+
+>>>>>>> master
         self.addCleanup(self.remove_hars)
 
     def remove_hars(self):
@@ -93,7 +113,9 @@ class StorageTest(HarFileTestCase):
     def setUp(self):
         super(StorageTest, self).setUp()
         self.url = self.config['harstorage_url']
-        self.test_file = os.path.join(self.test_dir, str(uuid.uuid4()) + '.har')
+        self.test_file = os.path.join(
+            self.test_dir, str(uuid.uuid4()) + '.har'
+        )
         with open(self.test_file, 'w') as f:
             f.write("I'm a fake har file")
 
