@@ -3,27 +3,14 @@
 import glob
 import logging
 import os
-<<<<<<< HEAD
 import re
 import uuid
 import unittest
 import shutil
 
+from httmock import urlmatch, HTTMock
 import requests
 import yaml
-
-import harprofiler
-import haruploader
-
-
-=======
-import shutil
-import unittest
-import uuid
-
-import requests
->>>>>>> master
-from httmock import urlmatch, HTTMock
 
 import harprofiler
 import haruploader
@@ -71,17 +58,9 @@ class ProfilerTest(unittest.TestCase):
 
 class HarFileTestCase(unittest.TestCase):
     def setUp(self):
-<<<<<<< HEAD
         self.config = yaml.load(file('test_config.yaml'))
         self.test_dir = self.config['har_dir']
         os.makedirs(self.test_dir)
-=======
-        self.config = harprofiler.load_config('test_config.yaml')
-
-        self.test_dir = self.config['har_dir']
-        os.makedirs(self.test_dir)
-
->>>>>>> master
         self.addCleanup(self.remove_hars)
 
     def remove_hars(self):
