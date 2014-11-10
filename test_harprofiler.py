@@ -1,15 +1,20 @@
 #!/usr/bin/env python
 
 import glob
+import logging
 import os
 import re
+import uuid
 import unittest
+import shutil
+
+import requests
+import yaml
+
 import harprofiler
 import haruploader
-import requests
-import logging 
-import uuid
-import shutil
+
+
 from httmock import urlmatch, HTTMock
 
 # Override logging level for tests
@@ -27,17 +32,21 @@ class ProfilerTest(unittest.TestCase):
     def test_slugify_simple_url(self):
         url = 'https://www.edx.org/'
         expected_slug = 'https-www-edx-org'
-        slug = harprofiler.slugify(url)
+        config = yaml.load(file('test_config.yaml'))
+        profiler = harprofiler.HarProfiler(config, url)
+        slug = profiler.slugify(url)
         self.assertEqual(slug, expected_slug)
 
     def test_slugify_complex_url(self):
         url = 'https://www.edx.org/course/mitx/foo-2881#.VE6swYWFuR9'
         expected_slug = 'https-www-edx-org-course-mitx-foo-2881-ve6swywfur9'
-        slug = harprofiler.slugify(url)
+        config = yaml.load(file('test_config.yaml'))
+        profiler = harprofiler.HarProfiler(config, url)
+        slug = profiler.slugify(url)
         self.assertEqual(slug, expected_slug)
 
     def test_default_config(self):
-        cfg = harprofiler.load_config(config_file='test_config.yaml')
+        cfg = yaml.load(file('test_config.yaml'))
         self.assertEqual(
             cfg['browsermob_dir'],
             './browsermob-proxy-2.0-beta-9'
@@ -50,11 +59,9 @@ class ProfilerTest(unittest.TestCase):
 
 class HarFileTestCase(unittest.TestCase):
     def setUp(self):
-        self.config = harprofiler.load_config('test_config.yaml')
-        
+        self.config = yaml.load(file('test_config.yaml'))
         self.test_dir = self.config['har_dir']
         os.makedirs(self.test_dir)
-        
         self.addCleanup(self.remove_hars)
 
     def remove_hars(self):
@@ -62,6 +69,14 @@ class HarFileTestCase(unittest.TestCase):
 
 
 class AcceptanceTest(HarFileTestCase):
+    def setUp(self):
+        self.config = yaml.load(file('test_config.yaml'))
+        self.test_dir = self.config['har_dir']
+        self.addCleanup(self.remove_hars)
+
+    def remove_hars(self):
+        shutil.rmtree(self.test_dir)
+
     def test_main(self):
         harprofiler.main('test_config.yaml')
         num_urls = len(self.config['urls'])
@@ -150,14 +165,14 @@ class StorageTest(HarFileTestCase):
         """
         If a file fails to be sent to harstorage because of a connection issue,
         then it is left in the folder to retry.
-        """    
+        """
         @urlmatch(method='post')
         def harstorage_mock_bad_connection(*args, **kwargs):
             raise requests.exceptions.ConnectionError('ConnectionError')
 
         with HTTMock(harstorage_mock_bad_connection):
             haruploader.upload_hars(self.test_dir, self.url)
-        
+
         self.assertTrue(os.path.isfile(self.test_file))
 
     def test_failure_timeout(self):
