@@ -29,7 +29,6 @@ log = logging.getLogger('harprofiler')
 log.setLevel(logging.INFO)
 
 
-
 class HarProfiler:
 
     def __init__(self, config, url):
@@ -85,8 +84,9 @@ class HarProfiler:
         elif cached:
             log.info('saving HAR file: {}'.format(self.cached_har_name))
             with open(
-                os.path.join(self.har_dir, self.cached_har_name), 'w') as f:
-                    json.dump(har, f, indent=2, ensure_ascii=False)
+                os.path.join(self.har_dir, self.cached_har_name), 'w'
+            ) as f:
+                json.dump(har, f, indent=2, ensure_ascii=False)
 
     def load_page(self, url, run_cached=True):
         driver, proxy = self._make_proxied_webdriver()
@@ -124,8 +124,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='harprofiler.py')
     parser.add_argument(
         '-c', '--config',
-        default = 'config.yaml',
-        help = "Path to configuration file (Default: config.yaml)"
+        default='config.yaml',
+        help='Path to configuration file (Default: config.yaml)'
     )
     args = parser.parse_args()
 
