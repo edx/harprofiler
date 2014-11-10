@@ -96,7 +96,8 @@ def main(config_file='config.yaml'):
     if not os.path.isdir(config['har_dir']):
         os.makedirs(config['har_dir'])
 
-    create_hars(config['urls'], config['har_dir'], config['browsermob_dir'], config['run_cached'])
+    create_hars(config['urls'], config['har_dir'], config[
+                'browsermob_dir'], config['run_cached'])
 
     if config.get('harstorage_url'):
         upload_hars(config['har_dir'], config['harstorage_url'])
@@ -108,10 +109,10 @@ def main(config_file='config.yaml'):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='harprofiler.py')
     parser.add_argument(
-        '--config', 
+        '--config',
         '-c',
-        default = 'config.yaml', 
-        help = "Path to configuration file (Default: config.yaml)"
+        default='config.yaml',
+        help="Path to configuration file (Default: config.yaml)"
     )
     args = parser.parse_args()
 
