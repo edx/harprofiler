@@ -30,19 +30,17 @@ log.setLevel(logging.INFO)
 
 
 
-class Harprofiler:
+class HarProfiler:
 
     def __init__(self, config, url):
         self.har_dir = config['har_dir']
-        if not os.path.isdir(config['har_dir']):
-            os.makedirs(config['har_dir'])
         self.browsermob_dir = config['browsermob_dir']
         self.virtual_display = config['virtual_display']
         self.virtual_display_size_x = config['virtual_display_size_x']
         self.virtual_display_size_y = config['virtual_display_size_y']
 
         self.url_slug = self.slugify(url)
-        self.cached_url_slug = '{}-cached'.format(url_slug)
+        self.cached_url_slug = '{}-cached'.format(self.url_slug)
 
         epoch = time.time()
         self.har_name = '{}-{}.har'.format(self.url_slug, epoch)
@@ -55,19 +53,20 @@ class Harprofiler:
                 self.virtual_display_size_x,
                 self.virtual_display_size_y
             ))
-            display.start()
+            self.display.start()
 
         log.info('starting browsermob proxy')
         self.server = Server('{}/bin/browsermob-proxy'.format(
             self.browsermob_dir)
         )
         self.server.start()
+        return self
 
     def __exit__(self, type, value, traceback):
         log.info('stopping browsermob proxy')
         self.server.stop()
         log.info('stopping virtual display')
-        display.stop()
+        self.display.stop()
 
     def _make_proxied_webdriver(self):
         proxy = self.server.create_proxy()
@@ -76,24 +75,31 @@ class Harprofiler:
         driver = webdriver.Firefox(firefox_profile=profile)
         return (driver, proxy)
 
-    def _save_har(self, har):
-        log.info('saving HAR file: {}'.format(self.har_name))
-        har_path = os.path.join(self.har_dir, self.har_name)
-        with open(har_path, 'w') as f:
-            json.dump(har, f, indent=2, ensure_ascii=False)
+    def _save_har(self, har, cached=False):
+        if not os.path.isdir(self.har_dir):
+            os.makedirs(self.har_dir)
+        if not cached:
+            log.info('saving HAR file: {}'.format(self.har_name))
+            with open(os.path.join(self.har_dir, self.har_name), 'w') as f:
+                json.dump(har, f, indent=2, ensure_ascii=False)
+        elif cached:
+            log.info('saving HAR file: {}'.format(self.cached_har_name))
+            with open(
+                os.path.join(self.har_dir, self.cached_har_name), 'w') as f:
+                    json.dump(har, f, indent=2, ensure_ascii=False)
 
     def load_page(self, url, run_cached=True):
-        driver, proxy = load_proxied_webdriver()
+        driver, proxy = self._make_proxied_webdriver()
         proxy.new_har(self.url_slug)
         log.info('loading page: {}'.format(url))
         driver.get(url)
-        self.save_har(self.har_name, self.har_dir, proxy.har)
+        self._save_har(proxy.har)
 
         if run_cached:
             proxy.new_har(self.cached_url_slug)
             log.info('loading cached page: {}'.format(url))
             driver.get(url)
-            self.save_har(self.cached_har_name, self.har_dir, proxy.har)
+            self._save_har(proxy.har, cached=True)
 
         driver.quit()
 
@@ -104,7 +110,7 @@ class Harprofiler:
 
 
 def main(config_file='config.yaml'):
-    config = load_config(config_file)
+    config = yaml.load(file(config_file))
 
     for url in config['urls']:
         with HarProfiler(config, url) as profiler:
