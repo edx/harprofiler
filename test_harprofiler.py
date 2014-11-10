@@ -4,9 +4,9 @@ import glob
 import logging
 import os
 import re
+import shutil
 import uuid
 import unittest
-import shutil
 
 from httmock import urlmatch, HTTMock
 import requests
@@ -68,14 +68,6 @@ class HarFileTestCase(unittest.TestCase):
 
 
 class AcceptanceTest(HarFileTestCase):
-    def setUp(self):
-        self.config = yaml.load(file('test_config.yaml'))
-        self.test_dir = self.config['har_dir']
-        self.addCleanup(self.remove_hars)
-
-    def remove_hars(self):
-        shutil.rmtree(self.test_dir)
-
     def test_main(self):
         harprofiler.main('test_config.yaml')
         num_urls = len(self.config['urls'])

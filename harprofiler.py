@@ -78,15 +78,13 @@ class HarProfiler:
         if not os.path.isdir(self.har_dir):
             os.makedirs(self.har_dir)
         if not cached:
-            log.info('saving HAR file: {}'.format(self.har_name))
-            with open(os.path.join(self.har_dir, self.har_name), 'w') as f:
-                json.dump(har, f, indent=2, ensure_ascii=False)
+            har_name = self.har_name
         elif cached:
-            log.info('saving HAR file: {}'.format(self.cached_har_name))
-            with open(
-                os.path.join(self.har_dir, self.cached_har_name), 'w'
-            ) as f:
-                json.dump(har, f, indent=2, ensure_ascii=False)
+            har_name = self.cached_har_name
+
+        log.info('saving HAR file: {}'.format(har_name))
+        with open(os.path.join(self.har_dir, har_name), 'w' ) as f:
+            json.dump(har, f, indent=2, ensure_ascii=False)
 
     def load_page(self, url, run_cached=True):
         driver, proxy = self._make_proxied_webdriver()
