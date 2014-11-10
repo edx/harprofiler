@@ -8,8 +8,10 @@
 #
 #     http://www.apache.org/licenses/LICENSE-2.0
 #
-
+import argparse
 import json
+import logging
+import os
 import re
 import time
 import yaml
@@ -17,6 +19,13 @@ import yaml
 from browsermobproxy import Server
 from pyvirtualdisplay import Display
 from selenium import webdriver
+
+from haruploader import upload_hars
+
+
+logging.basicConfig(format="%(levelname)s [%(name)s] %(message)s")
+log = logging.getLogger('harprofiler')
+log.setLevel(logging.INFO)
 
 
 def load_config(config_file='config.yaml'):
@@ -30,14 +39,15 @@ def slugify(text):
     return slug
 
 
-def save_har(har_name, har):
-    with open(har_name, 'w') as f:
+def save_har(har_name, har_dir, har):
+    har_path = os.path.join(har_dir, har_name)
+    with open(har_path, 'w') as f:
         json.dump(har, f, indent=2, ensure_ascii=False)
 
 
-def create_hars(urls, browsermob_dir, run_cached):
+def create_hars(urls, har_dir, browsermob_dir, run_cached):
     for url in urls:
-        print 'starting browsermob proxy'
+        log.info('starting browsermob proxy')
         server = Server('{}/bin/browsermob-proxy'.format(browsermob_dir))
         server.start()
 
@@ -49,32 +59,32 @@ def create_hars(urls, browsermob_dir, run_cached):
         url_slug = slugify(url)
         proxy.new_har(url_slug)
 
-        print 'loading page: {}'.format(url)
+        log.info('loading page: {}'.format(url))
         driver.get(url)
 
         har_name = '{}-{}.har'.format(url_slug, time.time())
-        print 'saving HAR file: {}'.format(har_name)
-        save_har(har_name, proxy.har)
+        log.info('saving HAR file: {}'.format(har_name))
+        save_har(har_name, har_dir, proxy.har)
 
         if run_cached:
             url_slug = '{}-cached'.format(slugify(url))
             proxy.new_har(url_slug)
 
-            print 'loading cached page: {}'.format(url)
+            log.info('loading cached page: {}'.format(url))
             driver.get(url)
 
             har_name = '{}-{}.har'.format(url_slug, time.time())
-            print 'saving HAR file: {}'.format(har_name)
-            save_har(har_name, proxy.har)
+            log.info('saving HAR file: {}'.format(har_name))
+            save_har(har_name, har_dir, proxy.har)
 
         driver.quit()
 
-        print 'stopping browsermob proxy'
+        log.info('stopping browsermob proxy')
         server.stop()
 
 
-def main():
-    config = load_config()
+def main(config_file='config.yaml'):
+    config = load_config(config_file)
 
     if config['virtual_display']:
         display = Display(visible=0, size=(
@@ -83,11 +93,27 @@ def main():
         ))
         display.start()
 
-    create_hars(config['urls'], config['browsermob_dir'], config['run_cached'])
+    if not os.path.isdir(config['har_dir']):
+        os.makedirs(config['har_dir'])
+
+    create_hars(config['urls'], config['har_dir'], config[
+                'browsermob_dir'], config['run_cached'])
+
+    if config.get('harstorage_url'):
+        upload_hars(config['har_dir'], config['harstorage_url'])
 
     if config['virtual_display']:
         display.stop()
 
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser(prog='harprofiler.py')
+    parser.add_argument(
+        '--config',
+        '-c',
+        default='config.yaml',
+        help="Path to configuration file (Default: config.yaml)"
+    )
+    args = parser.parse_args()
+
+    main(args.config)
