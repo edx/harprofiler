@@ -7,6 +7,7 @@ BROWSERMOBPROXY_DOWNLOAD_URL=https://s3-us-west-1.amazonaws.com/lightbody-bmp/$B
 
 
 # Check each system package requirement and install if needed
+sudo apt-get -qq update
 for package in ${SYSTEM_PACKAGES[@]}; do
     dpkg -s $package 2>/dev/null >/dev/null || sudo apt-get -y install $package
 done
