@@ -8,19 +8,20 @@
 #
 #     http://www.apache.org/licenses/LICENSE-2.0
 #
-
+import argparse
 import json
-import re
+import logging
 import os
+import re
 import time
 import yaml
-import argparse
-import logging
 
 from browsermobproxy import Server
 from pyvirtualdisplay import Display
 from selenium import webdriver
+
 from haruploader import upload_hars
+
 
 logging.basicConfig(format="%(levelname)s [%(name)s] %(message)s")
 log = logging.getLogger('harprofiler')
@@ -107,7 +108,8 @@ def main(config_file='config.yaml'):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='harprofiler.py')
     parser.add_argument(
-        '--config',
+        '--config', 
+        '-c',
         default = 'config.yaml', 
         help = "Path to configuration file (Default: config.yaml)"
     )

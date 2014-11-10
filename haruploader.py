@@ -2,12 +2,12 @@
 """
 A basic python script for posting HAR files to a HarStorage server.
 """
-import os
-import urllib
-import requests
 import argparse
-import logging 
 from collections import Counter
+import logging 
+import os
+
+import requests
 
 logging.basicConfig(format="%(levelname)s [%(name)s] %(message)s")
 log = logging.getLogger('haruploader')
@@ -17,7 +17,7 @@ def save_file(filepath, url):
     """
     Sends the request to harstorage for the given path to a har file.
 
-    If the requests lib raises an exceptions, we will leave the file in the folder
+    If the requests lib raises an exception, we will leave the file in the folder
     to be retried later. The error will still be logged though. These exceptions 
     include:
         * requests.exceptions.ConnectionError
@@ -31,16 +31,15 @@ def save_file(filepath, url):
     """
 
     basename = os.path.basename(filepath)
+    url = url + "/results/upload"
+    headers = {
+        "Content-type": "application/x-www-form-urlencoded",
+        "Automated": "true",
+    }
 
     try:
-        url = url + "/results/upload"
-        headers = {
-            "Content-type": "application/x-www-form-urlencoded",
-            "Automated": "true",
-        }
-
-        with open(filepath) as file:
-            files = {'file': file.read()}
+        with open(filepath) as f:
+            files = {'file': f.read()}
             resp = requests.post(url, data=files, headers=headers)
 
             # Raise exception if 4XX or 5XX response code is returned 
@@ -92,10 +91,10 @@ def upload_hars(path, url):
             save_file(path, url)
         ])
     elif os.path.isdir(path):
-        for file in os.listdir(path):
-            if file.endswith('.har'):
+        for f in os.listdir(path):
+            if f.endswith('.har'):
                 results.update([
-                    save_file(os.path.join(path, file), url)
+                    save_file(os.path.join(path, f), url)
                 ])
     else:
         raise Exception("Can't find file or directory {}".format(path))

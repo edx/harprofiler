@@ -1,16 +1,19 @@
 #!/usr/bin/env python
 
 import glob
+import logging 
 import os
 import re
+import shutil
 import unittest
+import uuid
+
+import requests
+from httmock import urlmatch, HTTMock
+
 import harprofiler
 import haruploader
-import requests
-import logging 
-import uuid
-import shutil
-from httmock import urlmatch, HTTMock
+
 
 # Override logging level for tests
 loggers = [
