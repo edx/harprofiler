@@ -1,0 +1,2 @@
+include LICENSE *.rst *.txt
+recursive-include harprofiler *.py *.yaml

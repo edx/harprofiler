@@ -107,8 +107,17 @@ class HarProfiler:
         return slug
 
 
+def load_config(config_file):
+    try:
+        return yaml.load(file(config_file))
+    except IOError as e:
+        this_dir = os.path.abspath(os.path.dirname(__file__))
+        default_config_file = os.path.join(this_dir, 'config.yaml')
+        return yaml.load(file(default_config_file))
+
+
 def main(config_file='config.yaml'):
-    config = yaml.load(file(config_file))
+    config = load_config(config_file)
 
     for url in config['urls']:
         with HarProfiler(config, url) as profiler:
