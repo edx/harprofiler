@@ -15,7 +15,7 @@ Installation
 
 install system packages::
 
-    $ sudo apt-get install -y default-jre firefox git python-virtualenv xvfb
+    $ sudo apt-get install -y default-jre firefox git python-virtualenv unzip xvfb
 
 clone the harprofiler repo::
 
