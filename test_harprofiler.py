@@ -3,12 +3,14 @@
 import glob
 import logging
 import os
+import re
 import shutil
-import unittest
 import uuid
+import unittest
 
-import requests
 from httmock import urlmatch, HTTMock
+import requests
+import yaml
 
 import harprofiler
 import haruploader
@@ -29,17 +31,21 @@ class ProfilerTest(unittest.TestCase):
     def test_slugify_simple_url(self):
         url = 'https://www.edx.org/'
         expected_slug = 'https-www-edx-org'
-        slug = harprofiler.slugify(url)
+        config = yaml.load(file('test_config.yaml'))
+        profiler = harprofiler.HarProfiler(config, url)
+        slug = profiler.slugify(url)
         self.assertEqual(slug, expected_slug)
 
     def test_slugify_complex_url(self):
         url = 'https://www.edx.org/course/mitx/foo-2881#.VE6swYWFuR9'
         expected_slug = 'https-www-edx-org-course-mitx-foo-2881-ve6swywfur9'
-        slug = harprofiler.slugify(url)
+        config = yaml.load(file('test_config.yaml'))
+        profiler = harprofiler.HarProfiler(config, url)
+        slug = profiler.slugify(url)
         self.assertEqual(slug, expected_slug)
 
     def test_default_config(self):
-        cfg = harprofiler.load_config(config_file='test_config.yaml')
+        cfg = yaml.load(file('test_config.yaml'))
         self.assertEqual(
             cfg['browsermob_dir'],
             './browsermob-proxy-2.0-beta-9'
@@ -52,11 +58,9 @@ class ProfilerTest(unittest.TestCase):
 
 class HarFileTestCase(unittest.TestCase):
     def setUp(self):
-        self.config = harprofiler.load_config('test_config.yaml')
-
+        self.config = yaml.load(file('test_config.yaml'))
         self.test_dir = self.config['har_dir']
         os.makedirs(self.test_dir)
-
         self.addCleanup(self.remove_hars)
 
     def remove_hars(self):

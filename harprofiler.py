@@ -8,6 +8,7 @@
 #
 #     http://www.apache.org/licenses/LICENSE-2.0
 #
+
 import argparse
 import json
 import logging
@@ -28,91 +29,101 @@ log = logging.getLogger('harprofiler')
 log.setLevel(logging.INFO)
 
 
-def load_config(config_file='config.yaml'):
-    config = yaml.load(file(config_file))
-    return config
+class HarProfiler:
 
+    def __init__(self, config, url):
+        self.har_dir = config['har_dir']
+        self.browsermob_dir = config['browsermob_dir']
+        self.virtual_display = config['virtual_display']
+        self.virtual_display_size_x = config['virtual_display_size_x']
+        self.virtual_display_size_y = config['virtual_display_size_y']
 
-def slugify(text):
-    pattern = re.compile(r'[^a-z0-9]+')
-    slug = '-'.join(word for word in pattern.split(text.lower()) if word)
-    return slug
+        self.url_slug = self.slugify(url)
+        self.cached_url_slug = '{}-cached'.format(self.url_slug)
 
+        epoch = time.time()
+        self.har_name = '{}-{}.har'.format(self.url_slug, epoch)
+        self.cached_har_name = '{}-{}.har'.format(self.cached_url_slug, epoch)
 
-def save_har(har_name, har_dir, har):
-    har_path = os.path.join(har_dir, har_name)
-    with open(har_path, 'w') as f:
-        json.dump(har, f, indent=2, ensure_ascii=False)
+    def __enter__(self):
+        log.info('starting virtual display')
+        if self.virtual_display:
+            self.display = Display(visible=0, size=(
+                self.virtual_display_size_x,
+                self.virtual_display_size_y
+            ))
+            self.display.start()
 
-
-def create_hars(urls, har_dir, browsermob_dir, run_cached):
-    for url in urls:
         log.info('starting browsermob proxy')
-        server = Server('{}/bin/browsermob-proxy'.format(browsermob_dir))
-        server.start()
+        self.server = Server('{}/bin/browsermob-proxy'.format(
+            self.browsermob_dir)
+        )
+        self.server.start()
+        return self
 
-        proxy = server.create_proxy()
+    def __exit__(self, type, value, traceback):
+        log.info('stopping browsermob proxy')
+        self.server.stop()
+        log.info('stopping virtual display')
+        self.display.stop()
+
+    def _make_proxied_webdriver(self):
+        proxy = self.server.create_proxy()
         profile = webdriver.FirefoxProfile()
         profile.set_proxy(proxy.selenium_proxy())
         driver = webdriver.Firefox(firefox_profile=profile)
+        return (driver, proxy)
 
-        url_slug = slugify(url)
-        proxy.new_har(url_slug)
+    def _save_har(self, har, cached=False):
+        if not os.path.isdir(self.har_dir):
+            os.makedirs(self.har_dir)
+        if not cached:
+            har_name = self.har_name
+        elif cached:
+            har_name = self.cached_har_name
 
+        log.info('saving HAR file: {}'.format(har_name))
+        with open(os.path.join(self.har_dir, har_name), 'w' ) as f:
+            json.dump(har, f, indent=2, ensure_ascii=False)
+
+    def load_page(self, url, run_cached=True):
+        driver, proxy = self._make_proxied_webdriver()
+        proxy.new_har(self.url_slug)
         log.info('loading page: {}'.format(url))
         driver.get(url)
-
-        har_name = '{}-{}.har'.format(url_slug, time.time())
-        log.info('saving HAR file: {}'.format(har_name))
-        save_har(har_name, har_dir, proxy.har)
+        self._save_har(proxy.har)
 
         if run_cached:
-            url_slug = '{}-cached'.format(slugify(url))
-            proxy.new_har(url_slug)
-
+            proxy.new_har(self.cached_url_slug)
             log.info('loading cached page: {}'.format(url))
             driver.get(url)
-
-            har_name = '{}-{}.har'.format(url_slug, time.time())
-            log.info('saving HAR file: {}'.format(har_name))
-            save_har(har_name, har_dir, proxy.har)
+            self._save_har(proxy.har, cached=True)
 
         driver.quit()
 
-        log.info('stopping browsermob proxy')
-        server.stop()
+    def slugify(self, text):
+        pattern = re.compile(r'[^a-z0-9]+')
+        slug = '-'.join(word for word in pattern.split(text.lower()) if word)
+        return slug
 
 
 def main(config_file='config.yaml'):
-    config = load_config(config_file)
+    config = yaml.load(file(config_file))
 
-    if config['virtual_display']:
-        display = Display(visible=0, size=(
-            config['virtual_display_size_x'],
-            config['virtual_display_size_y']
-        ))
-        display.start()
-
-    if not os.path.isdir(config['har_dir']):
-        os.makedirs(config['har_dir'])
-
-    create_hars(config['urls'], config['har_dir'], config[
-                'browsermob_dir'], config['run_cached'])
+    for url in config['urls']:
+        with HarProfiler(config, url) as profiler:
+            profiler.load_page(url)
 
     if config.get('harstorage_url'):
         upload_hars(config['har_dir'], config['harstorage_url'])
-
-    if config['virtual_display']:
-        display.stop()
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='harprofiler.py')
     parser.add_argument(
-        '--config',
-        '-c',
+        '-c', '--config',
         default='config.yaml',
-        help="Path to configuration file (Default: config.yaml)"
+        help='Path to configuration file (Default: config.yaml)'
     )
     args = parser.parse_args()
 
