@@ -3,7 +3,6 @@
 import glob
 import logging
 import os
-import re
 import shutil
 import uuid
 import unittest
@@ -37,21 +36,21 @@ class ProfilerTest(unittest.TestCase):
     def test_label_prefix(self):
         url = 'https://www.edx.org/'
         expected_label = 'testprefix-https-www-edx-org'
-        config = yaml.load(file('test_config.yaml'))
+        config = yaml.load(file(TEST_CONFIG))
         profiler = harprofiler.HarProfiler(config, url)
         self.assertEqual(profiler.label, expected_label)
 
     def test_cached_label_prefix(self):
         url = 'https://www.edx.org/'
         expected_label = 'testprefix-https-www-edx-org-cached'
-        config = yaml.load(file('test_config.yaml'))
+        config = yaml.load(file(TEST_CONFIG))
         profiler = harprofiler.HarProfiler(config, url)
         self.assertEqual(profiler.cached_label, expected_label)
 
     def test_blank_label_prefix(self):
         url = 'https://www.edx.org/'
         expected_label = 'https-www-edx-org-cached'
-        config = yaml.load(file('test_config.yaml'))
+        config = yaml.load(file(TEST_CONFIG))
         config['label_prefix'] = None
         profiler = harprofiler.HarProfiler(config, url)
         self.assertEqual(profiler.cached_label, expected_label)
