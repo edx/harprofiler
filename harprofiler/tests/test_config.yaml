@@ -1,6 +1,7 @@
 browsermob_dir: ./browsermob-proxy-2.0-beta-9
 har_dir: ./test_hars
-harstorage_url: "http://edx.mockharstorage.com"
+harstorage_url: http://edx.mockharstorage.com
+label_prefix: testprefix-
 run_cached: true
 urls:
 - https://www.edx.org

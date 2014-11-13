@@ -34,6 +34,28 @@ TEST_CONFIG = test_config_file = os.path.join(
 
 class ProfilerTest(unittest.TestCase):
 
+    def test_label_prefix(self):
+        url = 'https://www.edx.org/'
+        expected_label = 'testprefix-https-www-edx-org'
+        config = yaml.load(file('test_config.yaml'))
+        profiler = harprofiler.HarProfiler(config, url)
+        self.assertEqual(profiler.label, expected_label)
+
+    def test_cached_label_prefix(self):
+        url = 'https://www.edx.org/'
+        expected_label = 'testprefix-https-www-edx-org-cached'
+        config = yaml.load(file('test_config.yaml'))
+        profiler = harprofiler.HarProfiler(config, url)
+        self.assertEqual(profiler.cached_label, expected_label)
+
+    def test_blank_label_prefix(self):
+        url = 'https://www.edx.org/'
+        expected_label = 'https-www-edx-org-cached'
+        config = yaml.load(file('test_config.yaml'))
+        config['label_prefix'] = None
+        profiler = harprofiler.HarProfiler(config, url)
+        self.assertEqual(profiler.cached_label, expected_label)
+
     def test_slugify_simple_url(self):
         url = 'https://www.edx.org/'
         expected_slug = 'https-www-edx-org'
