@@ -34,16 +34,17 @@ class HarProfiler:
     def __init__(self, config, url):
         self.har_dir = config['har_dir']
         self.browsermob_dir = config['browsermob_dir']
+        self.label_prefix = config['label_prefix'] or ''
         self.virtual_display = config['virtual_display']
         self.virtual_display_size_x = config['virtual_display_size_x']
         self.virtual_display_size_y = config['virtual_display_size_y']
 
-        self.url_slug = self.slugify(url)
-        self.cached_url_slug = '{}-cached'.format(self.url_slug)
+        self.label = self.label_prefix + self.slugify(url)
+        self.cached_label = '{}-cached'.format(self.label)
 
         epoch = time.time()
-        self.har_name = '{}-{}.har'.format(self.url_slug, epoch)
-        self.cached_har_name = '{}-{}.har'.format(self.cached_url_slug, epoch)
+        self.har_name = '{}-{}.har'.format(self.label, epoch)
+        self.cached_har_name = '{}-{}.har'.format(self.cached_label, epoch)
 
     def __enter__(self):
         log.info('starting virtual display')
@@ -88,13 +89,13 @@ class HarProfiler:
 
     def load_page(self, url, run_cached=True):
         driver, proxy = self._make_proxied_webdriver()
-        proxy.new_har(self.url_slug)
+        proxy.new_har(self.label)
         log.info('loading page: {}'.format(url))
         driver.get(url)
         self._save_har(proxy.har)
 
         if run_cached:
-            proxy.new_har(self.cached_url_slug)
+            proxy.new_har(self.cached_label)
             log.info('loading cached page: {}'.format(url))
             driver.get(url)
             self._save_har(proxy.har, cached=True)
