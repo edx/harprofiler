@@ -8,7 +8,7 @@ harprofiler
 About
 -----
 
-:code:`harprofiler` is a python package containing the :code:`harprofiler` and :code:`haruploader` modules. It is used for profiling web pageloads.  `harprofiler` loads a given URL and saves JSON files in HAR (HTTP Archive) format.  The HAR format contains detailed performance data about the page loading.  It will load the page once uncached, and then again with it cached in the browser.  A HAR file for each pageload is saved, and optionally uploaded to a :code:`harstorage` instance.
+:code:`harprofiler` is a python package containing the :code:`harprofiler` and :code:`haruploader` modules. It is used for profiling web pageloads.  :code:`harprofiler` loads a given URL and saves JSON files in HAR (HTTP Archive) format.  The HAR format contains detailed performance data about the page loading.  It will load the page once uncached, and then again with it cached in the browser.  A HAR file for each pageload is saved, and optionally uploaded to a :code:`harstorage` instance.
 
 Installation
 ------------
