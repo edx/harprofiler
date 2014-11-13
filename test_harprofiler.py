@@ -42,6 +42,14 @@ class ProfilerTest(unittest.TestCase):
         profiler = harprofiler.HarProfiler(config, url)
         self.assertEqual(profiler.cached_label, expected_label)
 
+    def test_blank_label_prefix(self):
+        url = 'https://www.edx.org/'
+        expected_label = 'https-www-edx-org-cached'
+        config = yaml.load(file('test_config.yaml'))
+        config['label_prefix'] = None
+        profiler = harprofiler.HarProfiler(config, url)
+        self.assertEqual(profiler.cached_label, expected_label)
+
     def test_slugify_simple_url(self):
         url = 'https://www.edx.org/'
         expected_slug = 'https-www-edx-org'
