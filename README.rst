@@ -17,30 +17,30 @@ Installation
 **Install via script - Ubuntu only**
 
 Best method for getting up and running quickly. This will install the requirements and activate a virtualenv.
-***
 
-	
+
 	$ source dev-bootstrap.sh
 
+****
 
-
-**Manual install** 
+**Manual install**
 
 System Requirements
-***
 
-
-* jre 
+* jre
 	* JAVA_HOME must be set
-* firefox 
-* git 
-* python & virtualenv 
-* xvfb
-* [browsermob proxy](http://bmp.lightbody.net/) 
-	* Default configuration assumes it is available under project root in a subdir (see "Configuration" below)	
+* firefox
+* git
+* python & virtualenv
+* `browsermob proxy`_
+    * Default configuration assumes it is available under project root in a subdir (see "Configuration" below)
+
+.. _browsermob proxy: http://bmp.lightbody.net/
+
 
 Python Requirements
-***
+
+****
 
 create a virtualenv and install Python dependencies::
 
