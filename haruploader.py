@@ -129,7 +129,7 @@ def main():
     parser = argparse.ArgumentParser(prog='haruploader.py')
     parser.add_argument(
         'harpath',
-        help=("Path to HAR file or directory containing har files",
+        help=("Path to HAR file or directory containing har files"
               "to be uploaded to harstorage"
               )
     )
