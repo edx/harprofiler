@@ -13,19 +13,34 @@ About
 Installation
 ------------
 
-install system packages::
 
-    $ sudo apt-get install -y default-jre firefox git python-virtualenv xvfb
+**Install via script - Ubuntu only**
 
-clone the harprofiler repo::
+Best method for getting up and running quickly
+***
 
-    $ git clone https://github.com/edx/harprofiler.git
+	
+	$ ./dev-bootstrap.sh
 
-download browsermob proxy into branch root::
 
-    $ cd harprofiler
-    $ wget https://s3-us-west-1.amazonaws.com/lightbody-bmp/browsermob-proxy-2.0-beta-9-bin.zip -O bmp.zip
-    $ unzip bmp.zip
+
+**Manual install** 
+
+System Requirements
+***
+
+
+* jre 
+	* JAVA_HOME must be set
+* firefox 
+* git 
+* python & virtualenv 
+* xvfb
+* [browsermob proxy](http://bmp.lightbody.net/) 
+	* Default configuration assumes it is available under project root in a subdir (see "Configuration" below)	
+
+Python Requirements
+***
 
 create a virtualenv and install Python dependencies::
 
