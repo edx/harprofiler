@@ -16,11 +16,11 @@ Installation
 
 **Install via script - Ubuntu only**
 
-Best method for getting up and running quickly
+Best method for getting up and running quickly. This will install the requirements and activate a virtualenv.
 ***
 
 	
-	$ ./dev-bootstrap.sh
+	$ source dev-bootstrap.sh
 
 
 
