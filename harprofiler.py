@@ -40,10 +40,7 @@ class HarProfiler:
         self.virtual_display_size_x = config['virtual_display_size_x']
         self.virtual_display_size_y = config['virtual_display_size_y']
 
-        self.label = '{}{}'.format(
-            self.label_prefix,
-            format(self.slugify(url))
-        )
+        self.label = '{}{}'.format(self.label_prefix, self.slugify(url))
         self.cached_label = '{}-cached'.format(self.label)
 
         epoch = time.time()
