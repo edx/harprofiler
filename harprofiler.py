@@ -32,9 +32,10 @@ log.setLevel(logging.INFO)
 class HarProfiler:
 
     def __init__(self, config, url):
-        self.har_dir = config['har_dir']
         self.browsermob_dir = config['browsermob_dir']
+        self.har_dir = config['har_dir']
         self.label_prefix = config['label_prefix'] or ''
+        self.run_cached = config['run_cached']
         self.virtual_display = config['virtual_display']
         self.virtual_display_size_x = config['virtual_display_size_x']
         self.virtual_display_size_y = config['virtual_display_size_y']
@@ -91,14 +92,14 @@ class HarProfiler:
         with open(os.path.join(self.har_dir, har_name), 'w' ) as f:
             json.dump(har, f, indent=2, ensure_ascii=False)
 
-    def load_page(self, url, run_cached=True):
+    def load_page(self, url):
         driver, proxy = self._make_proxied_webdriver()
         proxy.new_har(self.label)
         log.info('loading page: {}'.format(url))
         driver.get(url)
         self._save_har(proxy.har)
 
-        if run_cached:
+        if self.run_cached:
             proxy.new_har(self.cached_label)
             log.info('loading cached page: {}'.format(url))
             driver.get(url)
