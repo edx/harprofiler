@@ -28,6 +28,12 @@ for log in loggers:
 
 class ProfilerTest(unittest.TestCase):
 
+    def test_run_cached_property(self):
+        url = 'https://www.edx.org/'
+        config = yaml.load(file('test_config.yaml'))
+        profiler = harprofiler.HarProfiler(config, url)
+        self.assertTrue(profiler.run_cached)
+
     def test_label_prefix(self):
         url = 'https://www.edx.org/'
         expected_label = 'testprefix-https-www-edx-org'
