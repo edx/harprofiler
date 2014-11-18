@@ -50,8 +50,8 @@ class HarProfiler:
         self.cached_har_name = '{}-{}.har'.format(self.cached_label, epoch)
 
     def __enter__(self):
-        log.info('starting virtual display')
         if self.virtual_display:
+            log.info('starting virtual display')
             self.display = Display(visible=0, size=(
                 self.virtual_display_size_x,
                 self.virtual_display_size_y
@@ -68,8 +68,9 @@ class HarProfiler:
     def __exit__(self, type, value, traceback):
         log.info('stopping browsermob proxy')
         self.server.stop()
-        log.info('stopping virtual display')
-        self.display.stop()
+        if self.virtual_display:
+            log.info('stopping virtual display')
+            self.display.stop()
 
     def _make_proxied_webdriver(self):
         proxy = self.server.create_proxy()
