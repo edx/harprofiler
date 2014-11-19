@@ -14,6 +14,7 @@ import json
 import logging
 import os
 import re
+import textwrap
 import time
 import yaml
 
@@ -89,18 +90,35 @@ class HarProfiler:
         with open(os.path.join(self.har_dir, har_name), 'w' ) as f:
             json.dump(har, f, indent=2, ensure_ascii=False)
 
+    def _add_page_event_timings(self, driver, har):
+        jscript = textwrap.dedent("""
+            var performance = window.performance || {};
+            var timings = performance.timing || {};
+            return timings;
+            """)
+        timings = driver.execute_script(jscript)
+        har['log']['pages'][0]['pageTimings']['onContentLoad'] = (
+            timings['domContentLoadedEventEnd'] - timings['navigationStart']
+        )
+        har['log']['pages'][0]['pageTimings']['onLoad'] = (
+            timings['loadEventEnd'] - timings['navigationStart']
+        )
+        return har
+
     def load_page(self, url):
         driver, proxy = self._make_proxied_webdriver()
         proxy.new_har(self.label)
         log.info('loading page: {}'.format(url))
         driver.get(url)
-        self._save_har(proxy.har)
+        har = self._add_page_event_timings(driver, proxy.har)
+        self._save_har(har)
 
         if self.run_cached:
             proxy.new_har(self.cached_label)
             log.info('loading cached page: {}'.format(url))
             driver.get(url)
-            self._save_har(proxy.har, cached=True)
+            har = self._add_page_event_timings(driver, proxy.har)
+            self._save_har(har, cached=True)
 
         driver.quit()
 
