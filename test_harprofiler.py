@@ -5,8 +5,9 @@ import logging
 import os
 import re
 import shutil
-import uuid
 import unittest
+import uuid
+import urlparse
 
 from httmock import urlmatch, HTTMock
 import requests
@@ -82,6 +83,21 @@ class ProfilerTest(unittest.TestCase):
         self.assertTrue(cfg['virtual_display'])
         self.assertEqual(cfg['virtual_display_size_x'], 1024)
         self.assertEqual(cfg['virtual_display_size_y'], 768)
+
+
+class UploaderTestTest(unittest.TestCase):
+
+    def test_url_no_ending_slash(self):
+        base_url = 'http://foo.bar.com'
+        path = '/results/upload'
+        url = urlparse.urljoin(base_url, path)
+        self.assertEqual(url, 'http://foo.bar.com/results/upload')
+
+    def test_url_ending_in_slash(self):
+        base_url = 'http://foo.bar.com/'
+        path = '/results/upload'
+        url = urlparse.urljoin(base_url, path)
+        self.assertEqual(url, 'http://foo.bar.com/results/upload')
 
 
 class HarFileTestCase(unittest.TestCase):

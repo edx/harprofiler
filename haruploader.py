@@ -6,6 +6,7 @@ import argparse
 from collections import Counter
 import logging
 import os
+import urlparse
 
 import requests
 
@@ -33,7 +34,7 @@ def save_file(filepath, url):
     """
 
     basename = os.path.basename(filepath)
-    url = url + "/results/upload"
+    url = urlparse.urljoin(url, '/results/upload')
     headers = {
         "Content-type": "application/x-www-form-urlencoded",
         "Automated": "true",
