@@ -85,15 +85,15 @@ class ProfilerTest(unittest.TestCase):
         self.assertEqual(cfg['virtual_display_size_y'], 768)
 
 
-class UploaderTestTest(unittest.TestCase):
+class UploaderTest(unittest.TestCase):
 
-    def test_url_no_ending_slash(self):
+    def test_url_join_no_ending_slash(self):
         base_url = 'http://foo.bar.com'
         path = '/results/upload'
         url = urlparse.urljoin(base_url, path)
         self.assertEqual(url, 'http://foo.bar.com/results/upload')
 
-    def test_url_ending_in_slash(self):
+    def test_url__join_ending_in_slash(self):
         base_url = 'http://foo.bar.com/'
         path = '/results/upload'
         url = urlparse.urljoin(base_url, path)
