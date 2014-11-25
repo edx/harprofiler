@@ -21,6 +21,7 @@ import yaml
 from browsermobproxy import Server
 from pyvirtualdisplay import Display
 from selenium import webdriver
+from selenium.common.exceptions import NoSuchElementException
 
 from haruploader import upload_hars
 
@@ -32,7 +33,13 @@ log.setLevel(logging.INFO)
 
 class HarProfiler:
 
-    def __init__(self, config, url):
+    def __init__(self, config, url, login_first=False):
+        self.url = url
+        self.login_first = login_first
+
+        self.login_user = config.get('login_user')
+        self.login_password = config.get('login_password')
+
         self.browsermob_dir = config['browsermob_dir']
         self.har_dir = config['har_dir']
         self.label_prefix = config['label_prefix'] or ''
@@ -90,6 +97,28 @@ class HarProfiler:
         with open(os.path.join(self.har_dir, har_name), 'w' ) as f:
             json.dump(har, f, indent=2, ensure_ascii=False)
 
+    def _login(self, driver):
+        log.info('logging in...')
+
+        error_msg = 'must specify login credentials in yaml config file'
+        if self.login_user is None:
+            raise RuntimeError(error_msg)
+        if self.login_password is None:
+            raise RuntimeError(error_msg)
+
+        driver.get('https://courses.edx.org/login')
+
+        # handle both old and new style logins
+        try:
+            email_field = driver.find_element_by_id('email')
+            password_field = driver.find_element_by_id('password')
+        except NoSuchElementException:
+            email_field = driver.find_element_by_id('login-email')
+            password_field = driver.find_element_by_id('login-password')
+        email_field.send_keys(self.login_user)
+        password_field.send_keys(self.login_password)
+        password_field.submit()
+
     def _add_page_event_timings(self, driver, har):
         jscript = textwrap.dedent("""
             var performance = window.performance || {};
@@ -105,22 +134,29 @@ class HarProfiler:
         )
         return har
 
-    def load_page(self, url):
-        driver, proxy = self._make_proxied_webdriver()
-        proxy.new_har(self.label)
-        log.info('loading page: {}'.format(url))
-        driver.get(url)
-        har = self._add_page_event_timings(driver, proxy.har)
-        self._save_har(har)
+    def load_page(self):
+        try:
+            driver, proxy = self._make_proxied_webdriver()
 
-        if self.run_cached:
-            proxy.new_har(self.cached_label)
-            log.info('loading cached page: {}'.format(url))
-            driver.get(url)
+            if self.login_first:
+                self._login(driver)
+
+            proxy.new_har(self.label)
+            log.info('loading page: {}'.format(self.url))
+            driver.get(self.url)
             har = self._add_page_event_timings(driver, proxy.har)
-            self._save_har(har, cached=True)
+            self._save_har(har)
 
-        driver.quit()
+            if self.run_cached:
+                proxy.new_har(self.cached_label)
+                log.info('loading cached page: {}'.format(self.url))
+                driver.get(self.url)
+                har = self._add_page_event_timings(driver, proxy.har)
+                self._save_har(har, cached=True)
+        except Exception:
+            raise
+        finally:
+            driver.quit()
 
     def slugify(self, text):
         pattern = re.compile(r'[^a-z0-9]+')
@@ -131,9 +167,15 @@ class HarProfiler:
 def main(config_file='config.yaml'):
     config = yaml.load(file(config_file))
 
-    for url in config['urls']:
-        with HarProfiler(config, url) as profiler:
-            profiler.load_page(url)
+    for url_config in config['urls']:
+        if isinstance(url_config, basestring):
+            login_first = False
+            url = url_config
+        else:
+            login_first = url_config[1]
+            url = url_config[0]
+        with HarProfiler(config, url, login_first) as profiler:
+            profiler.load_page()
 
     if config.get('harstorage_url'):
         upload_hars(config['har_dir'], config['harstorage_url'])
