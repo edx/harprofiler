@@ -4,8 +4,7 @@ harstorage_url: http://edx.mockharstorage.com
 label_prefix: testprefix-
 run_cached: true
 urls:
-- https://www.edx.org
-- https://www.edx.org/course-search
+- https://www.example.com
 virtual_display: true
 virtual_display_size_x: 1024
 virtual_display_size_y: 768

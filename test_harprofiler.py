@@ -5,8 +5,8 @@ import logging
 import os
 import re
 import shutil
-import uuid
 import unittest
+import uuid
 
 from httmock import urlmatch, HTTMock
 import requests
