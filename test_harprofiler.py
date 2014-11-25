@@ -7,7 +7,6 @@ import re
 import shutil
 import unittest
 import uuid
-import urlparse
 
 from httmock import urlmatch, HTTMock
 import requests
