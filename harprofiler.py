@@ -100,7 +100,7 @@ class HarProfiler:
     def _login(self, driver):
         log.info('logging in...')
 
-        error_msg = 'must specify login credentials in config'
+        error_msg = 'must specify login credentials in yaml config file'
         if self.login_user is None:
             raise RuntimeError(error_msg)
         if self.login_password is None:
