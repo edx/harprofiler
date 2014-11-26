@@ -1,7 +1,9 @@
 #!/usr/bin/env python
+
 """
-A basic python script for posting HAR files to a HarStorage server.
+Post HAR files to a HarStorage server.
 """
+
 import argparse
 from collections import Counter
 import logging
@@ -15,100 +17,109 @@ log = logging.getLogger('haruploader')
 log.setLevel(logging.INFO)
 
 
-def save_file(filepath, url):
-    """
-    Sends the request to harstorage for the given path to a har file.
+class Uploader:
 
-    If the requests lib raises an exception, we will leave the file in
-    the folder to be retried later. The error will still be logged though.
-    These exceptions include:
-        * requests.exceptions.ConnectionError
-        * requests.exceptions.TooManyRedirects
-        * requests.exceptions.Timeout
-        * requests.exceptions.HTTPError
-        * requests.exceptions.URLRequired
-
-    If any other exception is raised, we will put the file in another folder.
-    Not to be retried, assuming the cause in this case is a poorly formatted
-    har file.
-    """
-
-    basename = os.path.basename(filepath)
-    url = urlparse.urljoin(url, '/results/upload')
-    headers = {
-        "Content-type": "application/x-www-form-urlencoded",
-        "Automated": "true",
-    }
-
-    try:
-        with open(filepath) as f:
-            files = {'file': f.read()}
-            resp = requests.post(url, data=files, headers=headers)
-
-            # Raise exception if 4XX or 5XX response code is returned
-            # The exception raised here will be a subclass or instance
-            # of requests.exceptions.RequestException.
-            resp.raise_for_status()
-
-            # Raise exception if response code is OK but response
-            # text doesn't indicate success. This seems to happen
-            # when the file isn't formatted exactly as expected.
-            # e.g. 'KeyError: timings'
-            if resp.text != 'Successful':
-                raise Exception(resp.text)
-    except requests.exceptions.RequestException as e:
-        log.info("{}: {}".format(basename, e.message))
-        return 2
-    except Exception as e:
-        log.info("{}: {}".format(basename, e.message))
-        move_file(filepath, 'failed')
-        return 1
-    else:
-        log.info("{}: Successful".format(basename))
-        move_file(filepath, 'success')
-        return 0
+    def __init__(self, path, url):
+        self.path = os.path.realpath(path)
+        self.url = urlparse.urljoin(url, '/results/upload')
 
 
-def move_file(filepath, dest):
-    base_dir = os.path.dirname(filepath)
+    def _save_file(self, filepath):
+        """
+        Sends the request to harstorage for the given path to a har file.
 
-    dirs = {
-        'failed': os.path.join(base_dir, 'failed_uploads'),
-        'success': os.path.join(base_dir, 'completed_uploads')
-    }
+        If the requests lib raises an exception, we will leave the file in
+        the folder to be retried later. The error will still be logged though.
+        These exceptions include:
+            * requests.exceptions.ConnectionError
+            * requests.exceptions.TooManyRedirects
+            * requests.exceptions.Timeout
+            * requests.exceptions.HTTPError
+            * requests.exceptions.URLRequired
 
-    if not os.path.isdir(dirs[dest]):
-        os.makedirs(dirs[dest])
+        If any other exception is raised, we will put the file in another folder.
+        Not to be retried, assuming the cause in this case is a poorly formatted
+        har file.
+        """
 
-    dest = os.path.join(dirs[dest], os.path.basename(filepath))
-    os.rename(filepath, dest)
+        basename = os.path.basename(filepath)
+        headers = {
+            "Content-type": "application/x-www-form-urlencoded",
+            "Automated": "true",
+        }
+
+        try:
+            with open(filepath) as f:
+                data = {'file': f.read()}
+                resp = requests.post(self.url, data=data, headers=headers)
+
+                # Raise exception if 4XX or 5XX response code is returned
+                # The exception raised here will be a subclass or instance
+                # of requests.exceptions.RequestException.
+                resp.raise_for_status()
+
+                # Raise exception if response code is OK but response
+                # text doesn't indicate success. This seems to happen
+                # when the file isn't formatted exactly as expected.
+                # e.g. 'KeyError: timings'
+                if resp.text != 'Successful':
+                    raise Exception(resp.text)
+        except requests.exceptions.RequestException as e:
+            log.info("{}: {}".format(basename, e.message))
+            return 2
+        except Exception as e:
+            log.info("{}: {}".format(basename, e.message))
+            self._move_file(filepath, 'failed')
+            return 1
+        else:
+            log.info("{}: Successful".format(basename))
+            self._move_file(filepath, 'success')
+            return 0
 
 
-def upload_hars(path, url):
-    log.info("Uploading har files from {} to {}".format(path, url))
-    path = os.path.realpath(path)
-    results = Counter()
+    def _move_file(self, filepath, dest):
+        base_dir = os.path.dirname(filepath)
 
-    if os.path.isfile(path):
-        results.update([
-            save_file(path, url)
-        ])
-    elif os.path.isdir(path):
-        for f in os.listdir(path):
-            if f.endswith('.har'):
-                results.update([
-                    save_file(os.path.join(path, f), url)
-                ])
-    else:
-        raise Exception("Can't find file or directory {}".format(path))
+        dirs = {
+            'failed': os.path.join(base_dir, 'failed_uploads'),
+            'success': os.path.join(base_dir, 'completed_uploads')
+        }
 
-    log.info(
-        'Done.'
-        '\n{} files successfully uploaded.'
-        '\n{} files failed to upload and will not be retried.'
-        '\n{} files failed to upload and will be retried next run.'
-        ''.format(results[0], results[1], results[2])
-    )
+        if not os.path.isdir(dirs[dest]):
+            os.makedirs(dirs[dest])
+
+        dest = os.path.join(dirs[dest], os.path.basename(filepath))
+        os.rename(filepath, dest)
+
+
+    def upload_hars(self):
+        log.info(
+            "Uploading har files from {} to {}".format(self.path, self.url)
+        )
+        results = Counter()
+
+        if os.path.isfile(self.path):
+            results.update([
+                self._save_file(self.path, self.url)
+            ])
+        elif os.path.isdir(self.path):
+            for f in os.listdir(self.path):
+                if f.endswith('.har'):
+                    results.update([
+                        self._save_file(os.path.join(self.path, f))
+                    ])
+        else:
+            raise Exception(
+                "Can't find file or directory {}".format(self.path)
+            )
+
+        log.info(
+            'Done.'
+            '\n{} files successfully uploaded.'
+            '\n{} files failed to upload and will not be retried.'
+            '\n{} files failed to upload and will be retried next run.'
+            ''.format(results[0], results[1], results[2])
+        )
 
 
 def main():
@@ -140,7 +151,9 @@ def main():
         help="URL of harstorage instance (default: 'http://localhost:5000')"
     )
     args = parser.parse_args()
-    upload_hars(args.harpath, args.url)
+
+    uploader = Uploader(args.harpath, args.url)
+    uploader.upload_hars()
 
 
 if __name__ == "__main__":
