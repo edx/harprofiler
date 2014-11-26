@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-Post HAR files to a HarStorage server.
+Send HAR files to a HarStorage server via HTTP POST.
 """
 
 import argparse
