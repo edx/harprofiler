@@ -131,7 +131,8 @@ class StorageTest(HarFileTestCase):
             }
 
         with HTTMock(harstorage_mock_success):
-            haruploader.upload_hars(self.test_dir, self.url)
+            uploader = haruploader.Uploader(self.test_dir, self.url)
+            uploader.upload_hars()
 
         expected_file = os.path.join(
             self.test_dir,
@@ -155,7 +156,8 @@ class StorageTest(HarFileTestCase):
             }
 
         with HTTMock(harstorage_mock_parsing_error):
-            haruploader.upload_hars(self.test_dir, self.url)
+            uploader = haruploader.Uploader(self.test_dir, self.url)
+            uploader.upload_hars()
 
         expected_file = os.path.join(
             self.test_dir,
@@ -178,7 +180,8 @@ class StorageTest(HarFileTestCase):
             }
 
         with HTTMock(harstorage_mock_server_error):
-            haruploader.upload_hars(self.test_dir, self.url)
+            uploader = haruploader.Uploader(self.test_dir, self.url)
+            uploader.upload_hars()
 
         self.assertTrue(os.path.isfile(self.test_file))
 
@@ -192,7 +195,8 @@ class StorageTest(HarFileTestCase):
             raise requests.exceptions.ConnectionError('ConnectionError')
 
         with HTTMock(harstorage_mock_bad_connection):
-            haruploader.upload_hars(self.test_dir, self.url)
+            uploader = haruploader.Uploader(self.test_dir, self.url)
+            uploader.upload_hars()
 
         self.assertTrue(os.path.isfile(self.test_file))
 
@@ -206,7 +210,8 @@ class StorageTest(HarFileTestCase):
             raise requests.exceptions.Timeout('TimeoutError')
 
         with HTTMock(harstorage_mock_timeout):
-            haruploader.upload_hars(self.test_dir, self.url)
+            uploader = haruploader.Uploader(self.test_dir, self.url)
+            uploader.upload_hars()
 
         self.assertTrue(os.path.isfile(self.test_file))
 

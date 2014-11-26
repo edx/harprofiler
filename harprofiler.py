@@ -23,7 +23,7 @@ from pyvirtualdisplay import Display
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 
-from haruploader import upload_hars
+from haruploader import Uploader
 
 
 logging.basicConfig(format="%(levelname)s [%(name)s] %(message)s")
@@ -178,7 +178,8 @@ def main(config_file='config.yaml'):
             profiler.load_page()
 
     if config.get('harstorage_url'):
-        upload_hars(config['har_dir'], config['harstorage_url'])
+        uploader = Uploader(config['har_dir'], config['harstorage_url'])
+        uploader.upload_hars()
 
 
 if __name__ == '__main__':
