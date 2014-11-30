@@ -1,0 +1,11 @@
+Build the HarProfiler HTML docs:
+--------------------------------
+
+* install Sphinx documentation generator:
+  - pip install sphinx
+
+* from the project root, run:
+    $ sphinx-build -b html docs harprofiler_docs
+
+This will produce HTML documentation in the 'harprofiler_docs' directory.
+Open 'harprofiler_docs/index.html' with your browser.
