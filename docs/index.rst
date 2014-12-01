@@ -5,31 +5,16 @@
    haruploader
 
 
-============================
-    SST - Web Test Framework
-============================
+==========================================================
+harprofiler - record HAR files for automated web pageloads
+==========================================================
 
-:Web Home: http://testutils.org/sst
 :Project Home: https://launchpad.net/selenium-simple-test
-:PyPI: http://pypi.python.org/pypi/sst
 :License: Apache License, Version 2.0
-:Author: Copyright (c) 2011-2013 Canonical Ltd.
+:Author: Copyright (c) 2014, edX TestEng
 
+About
+-----
 
----------------------------------
-    Automated Testing with Python
----------------------------------
+`harprofiler` is a python utility used for profiling web pageloads.  It loads web pages and saves JSON files in HAR (HTTP Archive) format.  By default, it will load a page once uncached, and then again with it cached in the browser.  A HAR file for each pageload is saved locally, and optionally uploaded to a HARStorage server instance. HAR files contain a log of HTTP client/server conversation and can be used for analysis of page load performance.
 
-SST (selenium-simple-test) is a web test framework that uses Python
-to generate functional browser-based tests.
-
-
-
------------------
-    Related links
------------------
-
-* `Selenium Project Home <http://selenium.googlecode.com>`_
-* `Selenium WebDriver (from 'Architecture of Open Source Applications')
-  <http://www.aosabook.org/en/selenium.html>`_
-* `Python Unittest <http://docs.python.org/library/unittest.html>`_
