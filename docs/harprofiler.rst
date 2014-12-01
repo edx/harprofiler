@@ -1,36 +1,33 @@
+===========
 harprofiler
 ===========
 
+------------
 Installation
 ------------
 
-**Install via script - Ubuntu/Debian only**
+Install via script (Ubuntu/Debian only)
+---------------------------------------
 
-Best method for getting up and running quickly. This will install the requirements and activate a virtualenv.
+Best method for getting up and running quickly. This will install the requirements and activate a virtualenv::
 
+    $ source dev-bootstrap.sh
 
-	$ source dev-bootstrap.sh
+----
 
-****
-
-**Manual install**
+Manual install
+--------------
 
 System Requirements
++++++++++++++++++++
 
-* jre
-	* JAVA_HOME must be set
-* firefox
-* git
-* python & virtualenv
-* `browsermob proxy`_
-    * Default configuration assumes it is available under project root in a subdir (see "Configuration" below)
-
-.. _browsermob proxy: http://bmp.lightbody.net/
-
+* Java JRE
+* Firefox browser
+* Python & Virtualenv
+* `Browsermob proxy <http://bmp.lightbody.net/>`_
 
 Python Requirements
-
-****
++++++++++++++++++++
 
 create a virtualenv and install Python dependencies::
 
@@ -38,6 +35,9 @@ create a virtualenv and install Python dependencies::
     $ source env/bin/activate
     $ pip install -r requirements.txt
 
+----
+
+-------------
 Configuration
 -------------
 
@@ -57,6 +57,9 @@ example config::
     virtual_display_size_x: 1024
     virtual_display_size_y: 768
 
+----
+
+-----
 Usage
 -----
 
