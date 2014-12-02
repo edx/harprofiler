@@ -48,7 +48,7 @@ example config::
     browsermob_dir: ./browsermob-proxy-2.0-beta-9
     har_dir: ./hars
     harstorage_url: http://localhost:5000
-    label_prefix:
+    label_prefix: my-prefix-
     run_cached: true
     urls:
     - https://www.edx.org
