@@ -2,7 +2,7 @@ language: python
 python:
   - "2.7"
 addons:
-    firefox: "33.0"
+    firefox: "34.0"
 install:
   - "bash install-bmp.sh"
   - "pip install -r requirements.txt"
