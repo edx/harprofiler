@@ -23,7 +23,6 @@ class Uploader:
         self.path = os.path.realpath(path)
         self.url = urlparse.urljoin(url, '/results/upload')
 
-
     def _save_file(self, filepath):
         """
         Sends the request to harstorage for the given path to a har file.
@@ -37,9 +36,9 @@ class Uploader:
             * requests.exceptions.HTTPError
             * requests.exceptions.URLRequired
 
-        If any other exception is raised, we will put the file in another folder.
-        Not to be retried, assuming the cause in this case is a poorly formatted
-        har file.
+        If any other exception is raised, we will put the file in another
+        folder.  It will not be retried, assuming the cause in this case is a
+        poorly formatted har file.
         """
 
         basename = os.path.basename(filepath)
@@ -76,7 +75,6 @@ class Uploader:
             self._move_file(filepath, 'success')
             return 0
 
-
     def _move_file(self, filepath, dest):
         base_dir = os.path.dirname(filepath)
 
@@ -90,7 +88,6 @@ class Uploader:
 
         dest = os.path.join(dirs[dest], os.path.basename(filepath))
         os.rename(filepath, dest)
-
 
     def upload_hars(self):
         log.info(

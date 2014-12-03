@@ -94,7 +94,7 @@ class HarProfiler:
             har_name = self.cached_har_name
 
         log.info('saving HAR file: {}'.format(har_name))
-        with open(os.path.join(self.har_dir, har_name), 'w' ) as f:
+        with open(os.path.join(self.har_dir, har_name), 'w') as f:
             json.dump(har, f, indent=2, ensure_ascii=False)
 
     def _login(self, driver):
