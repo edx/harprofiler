@@ -3,6 +3,9 @@ harprofiler
 
 *record har files for automated web pageloads*
 
+.. image:: https://travis-ci.org/edx/harprofiler.svg?branch=master
+    :target: https://travis-ci.org/edx/harprofiler
+
 ----
 
 About
