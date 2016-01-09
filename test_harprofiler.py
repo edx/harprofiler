@@ -75,7 +75,7 @@ class ProfilerTest(unittest.TestCase):
         cfg = yaml.load(file('test_config.yaml'))
         self.assertEqual(
             cfg['browsermob_dir'],
-            './browsermob-proxy-2.0-beta-9'
+            './browsermob-proxy-2.1.0-beta-4'
         )
         self.assertTrue(cfg['run_cached'])
         self.assertTrue(cfg['virtual_display'])
