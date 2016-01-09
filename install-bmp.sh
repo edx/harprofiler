@@ -1,8 +1,10 @@
 #!/bin/bash
 
-BROWSERMOBPROXY_DIR=browsermob-proxy-2.0-beta-9
-BROWSERMOBPROXY_ZIP=$BROWSERMOBPROXY_DIR-bin.zip
-BROWSERMOBPROXY_DOWNLOAD_URL=https://s3-us-west-1.amazonaws.com/lightbody-bmp/$BROWSERMOBPROXY_ZIP
+https://github.com/lightbody/browsermob-proxy/releases/download/
+
+BROWSERMOBPROXY_DIR=browsermob-proxy-2.1.0-beta-4
+BROWSERMOBPROXY_ZIP=${BROWSERMOBPROXY_DIR}-bin.zip
+BROWSERMOBPROXY_DOWNLOAD_URL=https://github.com/lightbody/browsermob-proxy/releases/download/${BROWSERMOBPROXY_DIR}/$BROWSERMOBPROXY_ZIP
 
 # Download and unzip browsermob-proxy server if it doesn't exist
 if [ ! -d "$BROWSERMOBPROXY_DIR" ]; then
